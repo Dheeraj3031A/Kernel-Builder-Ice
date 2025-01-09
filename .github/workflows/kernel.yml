@@ -7,40 +7,44 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "14 13 * * 5"
-
+    
 jobs:
+  build:
     runs-on: self-hosted
-    name: Install jq
-    run: sudo apt-get update && sudo apt-get install -y jq
-    Read-configuration:
     outputs:
       CONFIGS: ${{ steps.generate-matrix.outputs.CONFIGS }}
       BUILD_DATE: ${{ steps.generate-builddate.outputs.BUILDDATE }}
     steps:
-      # This action checks-out your CONFIGSitory under $GITHUB_WORKSPACE, so your workflow can access it.
-      - name: 😄 Checkout
+      # This action checks out your repository under $GITHUB_WORKSPACE, so your workflow can access it.
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Match the configuration files in the CONFIGS directory, read the contents and merge them into an array.
-      - name: 😆 Generate Matrix
+      # Install jq for processing JSON files.
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      # Match the configuration files in the CONFIGS directory, read the contents, and merge them into an array.
+      - name: Generate Matrix
         id: generate-matrix
         run: |
           echo "CONFIGS<<EOF" >> $GITHUB_OUTPUT
           jq -s '[.[][]]' Kernel/configs/*.config.json >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      # Set compile time.
-      - name: ⏰ Set builddate
+      # Generate the build date to use as an output.
+      - name: Generate Build Date
         id: generate-builddate
-        run: echo "BUILDDATE=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
+        run: |
+          echo "BUILDDATE=$(date +'%Y-%m-%d')" >> $GITHUB
+          
 
   Build-Kernel:
     name: "🐎 Build kernel"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs:
       - Read-configuration
     strategy:
-      max-parallel: 4
+      max-parallel: 64
       fail-fast: false
       matrix:
         CONFIG: ${{ fromJSON(needs.Read-configuration.outputs.CONFIGS) }}
