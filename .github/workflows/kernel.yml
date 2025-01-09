@@ -9,9 +9,10 @@ on:
     - cron: "14 13 * * 5"
 
 jobs:
-  Read-configuration:
-    name: 🐂 Parse *.config.json
     runs-on: self-hosted
+    name: Install jq
+    run: sudo apt-get update && sudo apt-get install -y jq
+    Read-configuration:
     outputs:
       CONFIGS: ${{ steps.generate-matrix.outputs.CONFIGS }}
       BUILD_DATE: ${{ steps.generate-builddate.outputs.BUILDDATE }}
