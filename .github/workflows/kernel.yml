@@ -9,7 +9,7 @@ on:
     - cron: "14 13 * * 5"
     
 jobs:
-  build:
+  Read-configuration:
     runs-on: self-hosted
     outputs:
       CONFIGS: ${{ steps.generate-matrix.outputs.CONFIGS }}
