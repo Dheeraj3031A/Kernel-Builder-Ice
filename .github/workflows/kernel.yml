@@ -35,9 +35,8 @@ jobs:
       - name: Generate Build Date
         id: generate-builddate
         run: |
-          echo "BUILDDATE=$(date +'%Y-%m-%d')" >> $GITHUB
-          
-
+          echo "BUILDDATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+       
   Build-Kernel:
     name: "🐎 Build kernel"
     runs-on: self-hosted
